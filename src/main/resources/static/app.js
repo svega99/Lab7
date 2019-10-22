@@ -46,6 +46,27 @@ var app = (function () {
                 addPointToCanvas(point);
                 
             });
+			
+			stompClient.subscribe('/topic/newpolygon.'+conexionNumber, function (eventbody) {
+                var canvas = document.getElementById("canvas");
+                var ctx = canvas.getContext("2d");
+                var point0 = null;
+                
+                ctx.beginPath();
+                (JSON.parse(eventbody.body)).map(function (elem, index) {
+                    if(index === 0){
+                        point0 = elem;
+                        ctx.moveTo(elem.x, elem.y);
+                    }else{
+                        ctx.lineTo(elem.x, elem.y);
+                        if(index === (JSON.parse(eventbody.body)).length){
+                            ctx.lineTo(poin0.x, point0.y);
+                        }
+                    }
+                })
+                ctx.closePath();
+                ctx.fill();
+            })
         });
 
     };
@@ -67,7 +88,7 @@ var app = (function () {
             addPointToCanvas(pt);
 
             //publicar el evento
-            stompClient.send("/topic/newpoint."+conexionNumber, {}, JSON.stringify(pt));
+            stompClient.send("/app/newpoint."+conexionNumber, {}, JSON.stringify(pt));
         },
 
         disconnect: function () {
